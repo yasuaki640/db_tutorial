@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  db:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/usr/src
+    ports:
+      - "2222:22"
+    tty: true
+    cap_add:
+      - SYS_PTRACE
