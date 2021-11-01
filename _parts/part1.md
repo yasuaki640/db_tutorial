@@ -42,7 +42,7 @@ _back-end_ は
 
 **virtual machine**は、front-endによって生成されたバイトコードを命令として受け取り、1つ以上のテーブルまたはインデックスに対して操作を実行できます。各テーブルまたはインデックスは、B-treeと呼ばれるデータ構造に格納されています。 VMは本質的に、バイトコード命令種別に関する大きなswitch文なのです。
 
-それぞれの** B-tree**は多くのノードで構成されています。 各ノードの長さは1ページです。 B-treeは、pagerにコマンドを発行することにより、ディスクからページを取得したり、ディスクに保存したりできます。
+それぞれの**B-tree**は多くのノードで構成されています。 各ノードの長さは1ページです。 B-treeは、pagerにコマンドを発行することにより、ディスクからページを取得したり、ディスクに保存したりできます。
 
 **pager**は、データのページを読み書きするコマンドを受け取り、データベースファイルの適切な[offset](https://ja.wikipedia.org/wiki/%E3%82%AA%E3%83%95%E3%82%BB%E3%83%83%E3%83%88_(%E3%82%B3%E3%83%B3%E3%83%94%E3%83%A5%E3%83%BC%E3%82%BF))での読み取り/書き込みを担当します。 また、最近アクセスしたページのキャッシュをメモリに保持し、それらのページをいつディスクに書き戻す必要があるかを判断します。
 
@@ -131,13 +131,19 @@ ssize_t getline(char **lineptr, size_t *n, FILE *stream);
 [comment]: <> (`n` : a pointer to the variable we use to save the size of allocated buffer.)
 `n` : 割り当てられたバッファのサイズを保存するために使用する変数へのポインタ。
 
-`stream` : the input stream to read from. We'll be reading from standard input.
+[comment]: <> (`stream` : the input stream to read from. We'll be reading from standard input.)
+`stream` : 入力ストリーム。標準入力から読み取ります。
 
-`return value` : the number of bytes read, which may be less than the size of the buffer.
+<!-- `return value` : the number of bytes read, which may be less than the size of the buffer. -->
+`ssize_t` : 読み取られたバイト数。バッファサイズよりも小さい場合があります。
 
-We tell `getline` to store the read line in `input_buffer->buffer` and the size of the allocated buffer in `input_buffer->buffer_length`. We store the return value in `input_buffer->input_length`.
+<!-- We tell `getline` to store the read line in `input_buffer->buffer` and the size of the allocated buffer in `input_buffer->buffer_length`. We store the return value in `input_buffer->input_length`.
 
-`buffer` starts as null, so `getline` allocates enough memory to hold the line of input and makes `buffer` point to it.
+`buffer` starts as null, so `getline` allocates enough memory to hold the line of input and makes `buffer` point to it. -->
+
+`getline`には、読み取り行を `input_buffer->buffer`に格納し、割り当てられたバッファのサイズを` input_buffer->buffer_length`に保持させます。戻り値は `input_buffer->input_length`に保持させます。
+
+`buffer`はnullで始まるため、` getline`は入力行を保持するのに十分なメモリを割り当て、 `buffer`がそれを指すようにします。
 
 ```c
 void read_input(InputBuffer* input_buffer) {
