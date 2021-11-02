@@ -12,9 +12,9 @@ Web開発者として、私は仕事でリレーショナルデータベース�
 - フルテーブルスキャンはいつどのように行われる？
 - プリペアドステートメントはどのような形式で保存される？
 
-言い換えれば、データベースはどのように**機能**するのか？
+言い換えれば、データベースはどのように**work**するのか？
 
-事態を理解するために、私はデータベースをスクラッチで書きました。 MySQLやPostgreSQLよりも機能が少なく、小さく設計されているため、sqliteをモデルにしています。データベース全体が1つのファイルに保存されます！
+事態を理解するために、私はデータベースをスクラッチで書きました。 MySQLやPostgreSQLよりも機能が少なく、小さく設計されているため、sqliteをモデルにしています。データベース全体が1つのファイ-ルに保存されます！
 
 # Sqlite
 
@@ -69,7 +69,7 @@ sqlite> .exit
 ```
 
 <!-- To do that, our main function will have an infinite loop that prints the prompt, gets a line of input, then processes that line of input: -->
-このため、メイン関数にはプロンプトを出力し、入力行を取得して処理する無限ループがあります。
+このため、main関数にはプロンプトを出力し、入力行を取得して処理する無限ループがあります。
 
 ```c
 int main(int argc, char* argv[]) {
@@ -109,7 +109,7 @@ InputBuffer* new_input_buffer() {
 ```
 
 [comment]: <> (Next, `print_prompt&#40;&#41;` prints a prompt to the user. We do this before reading each line of input.)
-`print_prompt（）`はプロンプトを出力します。入力の各行を読み取る前に、この関数を実行します。
+`print_prompt()`はプロンプトを出力します。入力の各行を読み取る前に、この関数を実行します。
 
 ```c
 void print_prompt() { printf("db > "); }
@@ -117,15 +117,14 @@ void print_prompt() { printf("db > "); }
 
 
 [comment]: <> (To read a line of input, use [getline&#40;&#41;]&#40;http://man7.org/linux/man-pages/man3/getline.3.html&#41;:)
-入力行を読み取るには、 [getline()](http://man7.org/linux/man-pages/man3/getline.3.html)を使用します
+入力行を読み取るには、[getline()](http://man7.org/linux/man-pages/man3/getline.3.html)を使用します
 
 ```c
 ssize_t getline(char **lineptr, size_t *n, FILE *stream);
 ```
 
 [comment]: <> (`lineptr` : a pointer to the variable we use to point to the buffer containing the read line. If it set to `NULL` it is mallocatted by `getline` and should thus be freed by the user, even if the command fails.)
-
-`lineptr` : 読み取り行を含むバッファーを指すために使用する変数へのポインタ。 NULLに設定すると、getlineによってメモリが動的に割り当てられるため、コマンドが失敗した場合でも、ユーザーはメモリ解放する必要があります。
+`lineptr` : 読み取り行を含むバッファーを指すために使用する変数へのポインタ。 NULLに設定すると、getlineによってメモリが動的に割り当てられるため、命令が失敗した場合でも、ユーザーはメモリ解放する必要があります。
 
 
 [comment]: <> (`n` : a pointer to the variable we use to save the size of allocated buffer.)
@@ -155,16 +154,14 @@ void read_input(InputBuffer* input_buffer) {
     exit(EXIT_FAILURE);
   }
 
-  // Ignore trailing newline
+  // 末尾の改行を無視
   input_buffer->input_length = bytes_read - 1;
   input_buffer->buffer[bytes_read - 1] = 0;
 }
 ```
 
-Now it is proper to define a function that frees the memory allocated for an
-instance of `InputBuffer *` and the `buffer` element of the respective
-structure (`getline` allocates memory for `input_buffer->buffer` in
-`read_input`).
+[comment]: <> (Now it is proper to define a function that frees the memory allocated for an instance of `InputBuffer *` and the `buffer` element of the respective structure &#40;`getline` allocates memory for `input_buffer->buffer` in `read_input`&#41;.)
+ここで、`InputBuffer *`のインスタンスに割り当てられたメモリと、それぞれの`buffer`要素を解放する関数を定義するのが適切です（`getline`は`read_input`の`input_buffer->buffer`にメモリを割り当てます）。
 
 ```c
 void close_input_buffer(InputBuffer* input_buffer) {
@@ -173,7 +170,8 @@ void close_input_buffer(InputBuffer* input_buffer) {
 }
 ```
 
-Finally, we parse and execute the command. There is only one recognized command right now : `.exit`, which terminates the program. Otherwise we print an error message and continue the loop.
+[comment]: <> (Finally, we parse and execute the command. There is only one recognized command right now : `.exit`, which terminates the program. Otherwise we print an error message and continue the loop.)
+最後に、コマンドを解析して実行します。現在認識されているコマンドは、プログラムを終了する `.exit`の1つだけです。それ以外の場合は、エラーメッセージを出力して、ループを続行します。
 
 ```c
 if (strcmp(input_buffer->buffer, ".exit") == 0) {
@@ -184,7 +182,9 @@ if (strcmp(input_buffer->buffer, ".exit") == 0) {
 }
 ```
 
-Let's try it out!
+[comment]: <> (Let's try it out!)
+それではやってみましょう!
+
 ```shell
 ~ ./db
 db > .tables
@@ -193,8 +193,8 @@ db > .exit
 ~
 ```
 
-Alright, we've got a working REPL. In the next part, we'll start developing our command language. Meanwhile, here's the entire program from this part:
-
+[comment]: <> (Alright, we've got a working REPL. In the next part, we'll start developing our command language. Meanwhile, here's the entire program from this part:)
+おｋです。我々は動作するREPLを手に入れました。次のパートでは、コマンド言語の開発を開始します。このパートのプログラム全体は次のとおりです。
 ```c
 #include <stdbool.h>
 #include <stdio.h>
