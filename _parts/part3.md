@@ -3,29 +3,41 @@ title: Part 3 - An In-Memory, Append-Only, Single-Table Database
 date: 2017-09-01
 ---
 
-We're going to start small by putting a lot of limitations on our database. For now, it will:
+<!-- We're going to start small by putting a lot of limitations on our database. For now, it will: -->
+我々は、DBに多くの制限を設けることで、スモールスタートします。
 
-- support two operations: inserting a row and printing all rows
-- reside only in memory (no persistence to disk)
-- support a single, hard-coded table
+<!-- - support two operations: inserting a row and printing all rows -->
+<!-- - reside only in memory (no persistence to disk) -->
+<!-- - support a single, hard-coded table -->
+- `INSERT`と`SELECT *`の2つの操作のサポート
+- メモリにのみ存在（ディスクへの永続化なし）
+- 単一のハードコードされたテーブルのサポート
 
-Our hard-coded table is going to store users and look like this:
+
+<!-- Our hard-coded table is going to store users and look like this: -->
+ハードコードされたテーブルは、ユーザーを保存するもので、以下のようになります。
+
+```
 
 | column   | type         |
 |----------|--------------|
 | id       | integer      |
 | username | varchar(32)  |
 | email    | varchar(255) |
+```
 
-This is a simple schema, but it gets us to support multiple data types and multiple sizes of text data types.
+<!-- This is a simple schema, but it gets us to support multiple data types and multiple sizes of text data types. -->
+これは単純なスキーマですが、複数のデータ型と複数のサイズのテキストデータ型をサポートが必要です。
 
-`insert` statements are now going to look like this:
+<!-- `insert` statements are now going to look like this: -->
+`insert`文は以下のようになります。
 
 ```
 insert 1 cstack foo@bar.com
 ```
 
-That means we need to upgrade our `prepare_statement` function to parse arguments
+<!-- That means we need to upgrade our `prepare_statement` function to parse arguments -->
+つまり、引数をパースするために `prepare_statement` 関数をアップグレードする必要があります。
 
 ```diff
    if (strncmp(input_buffer->buffer, "insert", 6) == 0) {
@@ -41,7 +53,8 @@ That means we need to upgrade our `prepare_statement` function to parse argument
    if (strcmp(input_buffer->buffer, "select") == 0) {
 ```
 
-We store those parsed arguments into a new `Row` data structure inside the statement object:
+<!-- We store those parsed arguments into a new `Row` data structure inside the statement object: -->
+これらのパースされた引数は、ステートメントオブジェクトの中の新しい `Row` データ構造に格納されます。
 
 ```diff
 +#define COLUMN_USERNAME_SIZE 32
@@ -58,17 +71,25 @@ We store those parsed arguments into a new `Row` data structure inside the state
  } Statement;
 ```
 
-Now we need to copy that data into some data structure representing the table. SQLite uses a B-tree for fast lookups, inserts and deletes. We'll start with something simpler. Like a B-tree, it will group rows into pages, but instead of arranging those pages as a tree it will arrange them as an array.
+<!-- Now we need to copy that data into some data structure representing the table. SQLite uses a B-tree for fast lookups, inserts and deletes. We'll start with something simpler. Like a B-tree, it will group rows into pages, but instead of arranging those pages as a tree it will arrange them as an array. -->
+次に、そのデータをテーブルを表現する何らかのデータ構造にコピーする必要があります。SQLiteは高速な検索、挿入、削除のためにB-treeを使用します。まずはもっと単純なものから始めましょう。B-treeのように、行をページにまとめますが、それらのページをツリーとして並べるのではなく、配列として並べます。
 
-Here's my plan:
+<!-- Here's my plan: -->
+これが私のプランです。
 
-- Store rows in blocks of memory called pages
+<!-- - Store rows in blocks of memory called pages
 - Each page stores as many rows as it can fit
 - Rows are serialized into a compact representation with each page
 - Pages are only allocated as needed
-- Keep a fixed-size array of pointers to pages
+- Keep a fixed-size array of pointers to pages -->
+- 行をページと呼ばれるメモリブロックに格納する
+- 各ページには収まるだけの行が格納される
+- 行はページごとにコンパクトな表現にシリアライズされる
+- ページは必要なときだけ割り当てる
+- ページへのポインタを固定サイズの配列で保持する
 
-First we'll define the compact representation of a row:
+<!-- First we'll define the compact representation of a row: -->
+まず、rowのコンパクトな表現を定義します。
 ```diff
 +#define size_of_attribute(Struct, Attribute) sizeof(((Struct*)0)->Attribute)
 +
@@ -81,14 +102,17 @@ First we'll define the compact representation of a row:
 +const uint32_t ROW_SIZE = ID_SIZE + USERNAME_SIZE + EMAIL_SIZE;
 ```
 
-This means the layout of a serialized row will look like this:
+<!-- This means the layout of a serialized row will look like this: -->
+つまり、シリアライズされた行のレイアウトは次のようになります。
 
+```
 | column   | size (bytes) | offset       |
 |----------|--------------|--------------|
 | id       | 4            | 0            |
 | username | 32           | 4            |
 | email    | 255          | 36           |
 | total    | 291          |              |
+```
 
 We also need code to convert to and from the compact representation.
 ```diff
