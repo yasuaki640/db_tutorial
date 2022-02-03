@@ -114,7 +114,8 @@ insert 1 cstack foo@bar.com
 | total    | 291          |              |
 ```
 
-We also need code to convert to and from the compact representation.
+<!-- We also need code to convert to and from the compact representation. -->
+また、コンパクトな表現と変換するコードも必要です。
 ```diff
 +void serialize_row(Row* source, void* destination) {
 +  memcpy(destination + ID_OFFSET, &(source->id), ID_SIZE);
