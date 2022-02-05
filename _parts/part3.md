@@ -130,7 +130,8 @@ insert 1 cstack foo@bar.com
 +}
 ```
 
-Next, a `Table` structure that points to pages of rows and keeps track of how many rows there are:
+<!-- Next, a `Table` structure that points to pages of rows and keeps track of how many rows there are: -->
+次に、行のページへのポインタを持ち、行数を記録する `Table` 構造体です。
 ```diff
 +const uint32_t PAGE_SIZE = 4096;
 +#define TABLE_MAX_PAGES 100
@@ -143,13 +144,18 @@ Next, a `Table` structure that points to pages of rows and keeps track of how ma
 +} Table;
 ```
 
-I'm making our page size 4 kilobytes because it's the same size as a page used in the virtual memory systems of most computer architectures. This means one page in our database corresponds to one page used by the operating system. The operating system will move pages in and out of memory as whole units instead of breaking them up.
+<!-- I'm making our page size 4 kilobytes because it's the same size as a page used in the virtual memory systems of most computer architectures. This means one page in our database corresponds to one page used by the operating system. The operating system will move pages in and out of memory as whole units instead of breaking them up. -->
+ページサイズを4キロバイトにしたのは、ほとんどのコンピュータ・アーキテクチャーの仮想メモリ・システムで使われているページと同じサイズだからです。つまり、データベースの1ページが、オペレーティングシステムで使われる1ページに相当するのです。オペレーティングシステムは、ページを分割することなく、全体の単位としてメモリに出し入れします。
 
-I'm setting an arbitrary limit of 100 pages that we will allocate. When we switch to a tree structure, our database's maximum size will only be limited by the maximum size of a file. (Although we'll still limit how many pages we keep in memory at once)
+<!-- I'm setting an arbitrary limit of 100 pages that we will allocate. When we switch to a tree structure, our database's maximum size will only be limited by the maximum size of a file. (Although we'll still limit how many pages we keep in memory at once) -->
+割り当てるページ数は100ページと任意に設定しています。ツリー構造に切り替えると、データベースの最大サイズは、ファイルの最大サイズによってのみ制限されます。(ただし、一度にメモリに保持するページ数は制限します）。
 
-Rows should not cross page boundaries. Since pages probably won't exist next to each other in memory, this assumption makes it easier to read/write rows.
+<!-- Rows should not cross page boundaries. Since pages probably won't exist next to each other in memory, this assumption makes it easier to read/write rows. -->
+行はページの境界を越えてはいけません。ページがメモリ上で隣り合って存在することはないでしょうから、この仮定は行の読み書きを容易にします。
 
-Speaking of which, here is how we figure out where to read/write in memory for a particular row:
+
+<!-- Speaking of which, here is how we figure out where to read/write in memory for a particular row: -->
+そういえば、ある行のメモリのどこを読み書きするかは、こうして把握することができます。
 ```diff
 +void* row_slot(Table* table, uint32_t row_num) {
 +  uint32_t page_num = row_num / ROWS_PER_PAGE;
@@ -164,7 +170,8 @@ Speaking of which, here is how we figure out where to read/write in memory for a
 +}
 ```
 
-Now we can make `execute_statement` read/write from our table structure:
+<!-- Now we can make `execute_statement` read/write from our table structure: -->
+これで、テーブル構造から `execute_statement` を読み書きできるようになりました。
 ```diff
 -void execute_statement(Statement* statement) {
 +ExecuteResult execute_insert(Statement* statement, Table* table) {
@@ -203,8 +210,9 @@ Now we can make `execute_statement` read/write from our table structure:
  }
 ```
 
-Lastly, we need to initialize the table, create the respective
-memory release function and handle a few more error cases:
+<!-- Lastly, we need to initialize the table, create the respective
+memory release function and handle a few more error cases: -->
+最後に、テーブルを初期化し、メモリ解放関数と、いくつかのエラー処理を追加します。
 
 ```diff
 + Table* new_table() {
@@ -256,7 +264,8 @@ memory release function and handle a few more error cases:
  }
  ```
 
- With those changes we can actually save data in our database!
+ <!-- With those changes we can actually save data in our database! -->
+  これらの変更により、実際にデータベースにデータを保存することができるようになりました!
  ```command-line
 ~ ./db
 db > insert 1 cstack foo@bar.com
@@ -273,11 +282,15 @@ db > .exit
 ~
 ```
 
-Now would be a great time to write some tests, for a couple reasons:
+<!-- Now would be a great time to write some tests, for a couple reasons:
 - We're planning to dramatically change the data structure storing our table, and tests would catch regressions.
-- There are a couple edge cases we haven't tested manually (e.g. filling up the table)
+- There are a couple edge cases we haven't tested manually (e.g. filling up the table) -->
+いくつかの理由から、今がテストを書くのに最適な時期です。
+- テーブルを保存するデータ構造を大幅に変更する予定なので、テストでデグレを検出することができます。
+- 手動テスト未実施のエッジケースの存在 (e.g. テーブルを一杯にする)
 
-We'll address those issues in the next part. For now, here's the complete diff from this part:
+<!-- We'll address those issues in the next part. For now, here's the complete diff from this part: -->
+上記の問題は、次のパートで解決します。ひとまず、このパートの差分は以下です。
 ```diff
 @@ -2,6 +2,7 @@
  #include <stdio.h>
