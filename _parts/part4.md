@@ -3,11 +3,15 @@ title: Part 4 - Our First Tests (and Bugs)
 date: 2017-09-03
 ---
 
-We've got the ability to insert rows into our database and to print out all rows. Let's take a moment to test what we've got so far.
+<!-- We've got the ability to insert rows into our database and to print out all rows. Let's take a moment to test what we've got so far. -->
+DBに行を挿入し、すべての行を表示する機能を手に入れました。では、ここまでの内容を少しテストしてみましょう。
 
-I'm going to use [rspec](http://rspec.info/) to write my tests because I'm familiar with it, and the syntax is fairly readable.
+<!-- I'm going to use [rspec](http://rspec.info/) to write my tests because I'm familiar with it, and the syntax is fairly readable. -->
+[rspec](http://rspec.info/)を使ってテストを書くことにします。これは、私が慣れていて、構文がかなり読みやすいからです。
 
-I'll define a short helper to send a list of commands to our database program then make assertions about the output:
+
+<!-- I'll define a short helper to send a list of commands to our database program then make assertions about the output: -->
+ここでは、データベースプログラムにコマンドのリストを送信し、その出力についてアサーションを行う短いヘルパーを定義します。
 
 ```ruby
 describe 'database' do
@@ -42,7 +46,8 @@ describe 'database' do
 end
 ```
 
-This simple test makes sure we get back what we put in. And indeed it passes:
+<!-- This simple test makes sure we get back what we put in. And indeed it passes: -->
+この簡単なテストは、投入したデータが帰ってくるか確認するものです。そして実際、パスします。
 ```command-line
 bundle exec rspec
 .
@@ -51,7 +56,8 @@ Finished in 0.00871 seconds (files took 0.09506 seconds to load)
 1 example, 0 failures
 ```
 
-Now it's feasible to test inserting a large number of rows into the database:
+<!-- Now it's feasible to test inserting a large number of rows into the database: -->
+これで、データベースに大量の行を挿入するテストが実行可能になりました。
 ```ruby
 it 'prints error message when table is full' do
   script = (1..1401).map do |i|
@@ -63,7 +69,8 @@ it 'prints error message when table is full' do
 end
 ```
 
-Running tests again...
+<!-- Running tests again... -->
+テストを再実行します。
 ```command-line
 bundle exec rspec
 ..
@@ -72,9 +79,11 @@ Finished in 0.01553 seconds (files took 0.08156 seconds to load)
 2 examples, 0 failures
 ```
 
-Sweet, it works! Our db can hold 1400 rows right now because we set the maximum number of pages to 100, and 14 rows can fit in a page.
+<!-- Sweet, it works! Our db can hold 1400 rows right now because we set the maximum number of pages to 100, and 14 rows can fit in a page. -->
+うまくいきました! ページ数の最大値を100に設定し、1ページに14行が収まるようにしたため、現在DBは1400行保持できます。
 
-Reading through the code we have so far, I realized we might not handle storing text fields correctly. Easy to test with this example:
+<!-- Reading through the code we have so far, I realized we might not handle storing text fields correctly. Easy to test with this example: -->
+今までのコードを読んでいて、テキストフィールドの保存を正しく処理できていない可能性があることに気づきました。この例で簡単にテストできます。
 ```ruby
 it 'allows inserting strings that are the maximum length' do
   long_username = "a"*32
