@@ -32,7 +32,15 @@ RUN apt-get update \
       rsync \
       tar \
       python \
+      curl \
+      git \
   && apt-get clean
+
+RUN git clone https://github.com/rbenv/rbenv.git ~/.rbenv \
+    echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc
+
+RUN curl https://rubygems.org/rubygems/rubygems-3.3.8.tgz -O\
+    tar -xzvf rubygems-3.3.8.tgz
 
 RUN ( \
     echo 'LogLevel DEBUG2'; \
