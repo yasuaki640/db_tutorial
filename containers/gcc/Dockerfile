@@ -13,8 +13,6 @@
 
 FROM ubuntu:20.04
 
-SHELL ["/bin/bash", "-c"]
-
 RUN DEBIAN_FRONTEND="noninteractive" apt-get update && apt-get -y install tzdata
 
 RUN apt-get update \
@@ -34,21 +32,7 @@ RUN apt-get update \
       rsync \
       tar \
       python \
-      curl \
-      git \
   && apt-get clean
-
-# asdf
-RUN git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.9.0 \
- && . $HOME/.asdf/asdf.sh  \
- && . $HOME/.asdf/completions/asdf.bash 
-
-# ruby
-RUN asdf plugin add ruby https://github.com/asdf-vm/asdf-ruby.git
-
-# gem
-RUN curl https://rubygems.org/rubygems/rubygems-3.3.8.tgz -O \
- && tar -xzvf rubygems-3.3.8.tgz
 
 RUN ( \
     echo 'LogLevel DEBUG2'; \

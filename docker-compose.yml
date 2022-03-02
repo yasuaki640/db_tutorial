@@ -1,11 +1,13 @@
 version: "3.8"
 services:
-  db:
+  gcc:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: containers/gcc/Dockerfile
     volumes:
-      - .:/usr/src
+      - type: bind
+        source: .
+        target: /usr/src
     ports:
       - "2222:22"
     tty: true
