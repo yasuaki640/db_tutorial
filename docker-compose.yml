@@ -10,6 +10,7 @@ services:
         target: /usr/src
     ports:
       - "2222:22"
+    working_dir: /usr/src
     tty: true
     cap_add:
       - SYS_PTRACE
@@ -21,4 +22,5 @@ services:
       - type: bind
         source: .
         target: /usr/src
+    working_dir: /usr/src
     tty: true
